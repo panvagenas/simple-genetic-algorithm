@@ -1,23 +1,31 @@
 #!/usr/bin/python3
 import argparse
 from random import random, randrange, randint
-from math import ceil
+from math import ceil, sqrt
 from copy import copy
+import sys
+import time
 
 parser = argparse.ArgumentParser(description='A Simple Genetic Algorithm by Panagiotis Vagenas')
 
-parser.add_argument('-p', '--popsize', dest='popsize', default=50, type=int, help='GA Population Size')
-parser.add_argument('-g', '--maxgens', dest='maxgens', default=100, type=int, help='GA Generations')
-parser.add_argument('-n', '--nvars', dest='nvars', default=8, type=int, help='GA N Vars')
+parser.add_argument('-p', '--popsize', dest='popsize', default=50, type=int,
+                    help='GA Population Size')
+parser.add_argument('-g', '--maxgens', dest='maxgens', default=100, type=int,
+                    help='GA Generations')
+parser.add_argument('-n', '--nvars', dest='nvars', default=8, type=int,
+                    help='GA N Vars')
 parser.add_argument('-a', '--antigenpopsize', dest='antigenpopsize', default=1000, type=int,
                     help='Antigens Population Size')
 parser.add_argument('-r', '--runtimes', dest='runtimes', default=1, type=int,
                     help='Number of times GA will be called in order to eval Meta-GA chromosome')
 parser.add_argument('-x', '--crossover', dest='crossover', default=0.9, type=float,
                     help='Meta-GA Crossover Probability')
-parser.add_argument('-m', '--mutation', dest='mutation', default=0.01, type=float, help='Meta-GA Mutation Probability')
+parser.add_argument('-m', '--mutation', dest='mutation', default=0.01, type=float,
+                    help='Meta-GA Mutation Probability')
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_const', const=True,
                     help='Verbose info to std output')
+parser.add_argument('-o', '--output', dest='output', default='', type=str,
+                    help='If provided runtime information will be writen to')
 
 args = parser.parse_args()
 
@@ -154,25 +162,122 @@ class Population:
             member.gene = "".join(gene)
 
 
+if args.runtimes < 1:
+    sys.stderr.write('Runtimes must be an integer above 0. Your input was "{}"\n'.format(args.runtimes))
+    exit(1)
+
 print('Running SGA Algorithm...')
+
+if args.output:
+    f = open(args.output, 'w')
+else:
+    f = False
+
+a = [
+    '=' * 20, ' Arguments ', '=' * 20, '\n',
+    ('Population Size: %d\n'
+     'Generations: %d\n'
+     'N Vars: %d\n'
+     'Antigens Population Size: %d\n'
+     'Runtimes: %d\n'
+     'Crossover Probability: %f\n'
+     'Mutation Probability: %f\n' %
+     (args.popsize, args.maxgens, args.nvars, args.popsize, args.runtimes, args.crossover, args.mutation)),
+    '=' * 51, '\n'
+]
+s = "".join(a)
+
+if f:
+    f.write(s)
+
+if args.verbose:
+    print(s)
 
 mean = 0
 
-for i in range(0, args.runtimes):
+pop = False
+
+for r in range(0, args.runtimes):
     pop = Population(args.nvars, args.popsize, args.antigenpopsize)
+    best = Chromosome()
     pop.evaluate()
+
+    if args.runtimes > 1:
+        s = ''.join([
+            '\n\n',
+            '=' * 20,
+            (' Round %d ' % r),
+            '=' * 20,
+            '\n\n'
+        ])
+        if args.verbose:
+            print(s)
+
+        if f:
+            f.write(s)
+
+        print("".join(['=' * 20, ' Initial Population ', '=' * 20]))
+        for mem in pop.population:
+            print(mem.gene)
+
+        print("".join(['=' * 20, ' Antigens ', '=' * 20]))
+        for i in range(0, pop.antigene_pop_size, args.nvars):
+            print(pop.antigene_dna[i:i + args.nvars])
+
+    if f:
+        f.write(("\n%10s  %15s  %15s  %15s  %20s\n"
+                 % ("Generation", "Best Value", "Average", "StdDev", "Best Genotype")))
 
     for generation in range(0, args.maxgens):
         pop.select_new()
         pop.crossover(args.crossover)
         pop.mutate(args.mutation)
         pop.evaluate()
+        if args.verbose:
+            if args.runtimes > 1:
+                sys.stdout.write('Round %d / %d, Generation %d / %d\r'
+                                 % (r + 1, args.runtimes, generation + 1, args.maxgens))
+            else:
+                sys.stdout.write('Generation %d / %d\r' % (generation + 1, args.maxgens))
+
+            sys.stdout.flush()
+
+        if f:
+            sum_p = 0
+            sum_square = 0
+            for m in pop.population:
+                sum_p += m.fitness
+                sum_square += m.fitness ** 2
+            square_sum = sum_p * sum_p / pop.pop_size
+            dev = sqrt((1.0 / (pop.pop_size - 1)) * (sum_square - square_sum))
+            f.write("\n%10d  %15.4f  %15.4f  %15.4f %20s" %
+                    (generation + 1, pop.best.fitness, pop.mean_history[generation], dev, pop.best.gene))
 
     mean += pop.best.fitness
+
+    s = ''.join([
+        ('\n\nBest Member: %s\n' % pop.best.gene),
+        ('Fitness: %f' % pop.best.fitness)
+    ])
+    if args.verbose:
+        print(s)
+
+s = '\n\nSimulation Completed...\n'
+print(s)
+if f:
+    f.write(s)
+    if args.runtimes > 1:
+        f.write('Mean fitness: %f' % (mean / args.runtimes))
+    elif pop:
+        f.write('Best Member: %s\n' % pop.best.gene)
+        f.write('Fitness: %f' % pop.best.fitness)
 
 if args.runtimes > 1:
     print('Mean fitness: %f' % (mean / args.runtimes))
 else:
-    print('Fitness: %f' % mean)
+    print(''.join([
+        ('Best Member: %s\n' % pop.best.gene),
+        ('Fitness: %f' % pop.best.fitness)
+    ]))
 pass
 
