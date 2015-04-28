@@ -29,5 +29,8 @@ Options
   `-m MUTATION, --mutation MUTATION`                    Mutation Probability
   
   `-v, --verbose`                                       Print verbose info
+  
+  `-o OUTPUT, --output OUTPUT`                          Specify the output file name
+
  
 *this is a work in progress*

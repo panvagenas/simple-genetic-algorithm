@@ -25,7 +25,7 @@ parser.add_argument('-m', '--mutation', dest='mutation', default=0.01, type=floa
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_const', const=True,
                     help='Verbose info to std output')
 parser.add_argument('-o', '--output', dest='output', default='', type=str,
-                    help='If provided runtime information will be writen to')
+                    help='Specify the output file name')
 
 args = parser.parse_args()
 
