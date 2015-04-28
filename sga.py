@@ -202,7 +202,7 @@ for r in range(0, args.runtimes):
     best = Chromosome()
     pop.evaluate()
 
-    if args.runtimes > 1:
+    if args.runtimes > 1 and f:
         s = ''.join([
             '\n\n',
             '=' * 20,
@@ -210,12 +210,11 @@ for r in range(0, args.runtimes):
             '=' * 20,
             '\n\n'
         ])
-        if args.verbose:
-            print(s)
 
         if f:
             f.write(s)
 
+    if args.runtimes == 1:
         print("".join(['=' * 20, ' Initial Population ', '=' * 20]))
         for mem in pop.population:
             print(mem.gene)
@@ -233,14 +232,13 @@ for r in range(0, args.runtimes):
         pop.crossover(args.crossover)
         pop.mutate(args.mutation)
         pop.evaluate()
-        if args.verbose:
-            if args.runtimes > 1:
-                sys.stdout.write('Round %d / %d, Generation %d / %d\r'
-                                 % (r + 1, args.runtimes, generation + 1, args.maxgens))
-            else:
-                sys.stdout.write('Generation %d / %d\r' % (generation + 1, args.maxgens))
 
-            sys.stdout.flush()
+        if args.runtimes > 1:
+            sys.stdout.write('Round %d / %d, Generation %d / %d\r'
+                             % (r + 1, args.runtimes, generation + 1, args.maxgens))
+        else:
+            sys.stdout.write('Generation %d / %d\r' % (generation + 1, args.maxgens))
+        sys.stdout.flush()
 
         if f:
             sum_p = 0
@@ -256,8 +254,8 @@ for r in range(0, args.runtimes):
     mean += pop.best.fitness
 
     s = ''.join([
-        ('\n\nBest Member: %s\n' % pop.best.gene),
-        ('Fitness: %f' % pop.best.fitness)
+        ('\nBest Member: %s\n' % pop.best.gene),
+        ('Fitness: %f\n\n' % pop.best.fitness)
     ])
     if args.verbose:
         print(s)
