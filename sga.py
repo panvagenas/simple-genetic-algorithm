@@ -4,7 +4,7 @@ from random import random, randrange, randint
 from math import ceil
 from copy import copy
 
-parser = argparse.ArgumentParser(description='Meta-SGA Algorithm')
+parser = argparse.ArgumentParser(description='A Simple Genetic Algorithm by Panagiotis Vagenas')
 
 parser.add_argument('-p', '--popsize', dest='popsize', default=50, type=int, help='GA Population Size')
 parser.add_argument('-g', '--maxgens', dest='maxgens', default=100, type=int, help='GA Generations')
@@ -154,7 +154,7 @@ class Population:
             member.gene = "".join(gene)
 
 
-print('Running SGA Algorithm')
+print('Running SGA Algorithm...')
 
 mean = 0
 
