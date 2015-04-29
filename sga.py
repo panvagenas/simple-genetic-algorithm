@@ -4,7 +4,6 @@ from random import random, randrange, randint
 from math import ceil, sqrt
 from copy import copy
 import sys
-import time
 
 parser = argparse.ArgumentParser(description='A Simple Genetic Algorithm by Panagiotis Vagenas')
 
@@ -182,7 +181,7 @@ a = [
      'Runtimes: %d\n'
      'Crossover Probability: %f\n'
      'Mutation Probability: %f\n' %
-     (args.popsize, args.maxgens, args.nvars, args.popsize, args.runtimes, args.crossover, args.mutation)),
+     (args.popsize, args.maxgens, args.nvars, args.antigenpopsize, args.runtimes, args.crossover, args.mutation)),
     '=' * 51, '\n'
 ]
 s = "".join(a)
