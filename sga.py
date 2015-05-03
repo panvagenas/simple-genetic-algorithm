@@ -219,7 +219,7 @@ for r in range(0, args.runtimes):
             print(mem.gene)
 
         print("".join(['=' * 20, ' Antigens ', '=' * 20]))
-        for i in range(0, pop.antigene_pop_size, args.nvars):
+        for i in range(0, pop.antigene_pop_size*args.nvars, args.nvars):
             print(pop.antigene_dna[i:i + args.nvars])
 
     if f:
